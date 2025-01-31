@@ -23,15 +23,16 @@ async def start(update: Update, context: CallbackContext) -> None:
 async def echo(update: Update, context: CallbackContext) -> None:
     if update.message:
         user_id = update.message.from_user.id # type: ignore
-        if not is_user_in_whitelist(user_id):
-            await update.message.reply_text('Ваш ID не в whitelist. Доступ запрещен.')
-            return
         
         if update.message.text is None:
             await update.message.reply_text('Некорректное сообщение.')
             return
         
-        response = await get_imei_data(update.message.text)
+        if not '!' in update.message.text and not is_user_in_whitelist(user_id):
+            await update.message.reply_text('Ваш ID не в whitelist. Доступ запрещен. (В рамках тестирования, добавьте "!" в сообщение и эта проверка будет игнорироваться)')
+            return
+        
+        response = await get_imei_data(update.message.text.replace('!', ''))
         await update.message.reply_text(json.dumps(response, indent=4, ensure_ascii=False))
 
 async def get_imei_data(imei:str) -> dict|list:
