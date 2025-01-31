@@ -22,7 +22,6 @@ async def check_imei_endpoint(request: RequestBody):
     if not verify_token(request.token):
         raise HTTPException(status_code=403, detail="Forbidden")
     res = await check_imei(request.imei)
-    logger.info(f'{res=}')
     if res:
         return res
     return {'error':'Вообще непонятно что тут пошло не так -_-'}

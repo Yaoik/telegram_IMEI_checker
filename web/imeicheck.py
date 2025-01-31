@@ -38,8 +38,6 @@ async def check_imei(device_id:str) -> None|dict:
                 
         except Exception as e:
             logger.error(f"Error occurred: {e}")
-            logger.info(f"{url=}")
-            logger.info(f"{device_id=}")
-
+            
 if __name__ == "__main__":
     asyncio.run(check_imei('356735111052198'))
