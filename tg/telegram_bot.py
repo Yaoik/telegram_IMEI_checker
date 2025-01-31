@@ -1,13 +1,11 @@
 from dotenv import load_dotenv
 import logging
-import asyncio
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, filters, MessageHandler, CallbackContext
 import aiohttp
 import os
 import json
 from db import is_user_in_whitelist
-import re
 
 load_dotenv()
 
@@ -17,23 +15,6 @@ ACCESS_TOKEN = os.getenv('TOKENS', '').split(',')[0]
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
-
-def is_valid_imei(imei: str) -> bool:
-    if not re.fullmatch(r"\d{15}", imei):
-        return False
-    
-    def luhn_checksum(imei: str) -> bool:
-        total = 0
-        for i, digit in enumerate(reversed(imei)):
-            n = int(digit)
-            if i % 2 == 1:
-                n *= 2
-                if n > 9:
-                    n -= 9
-            total += n
-        return total % 10 == 0
-    
-    return luhn_checksum(imei)
 
 async def start(update: Update, context: CallbackContext) -> None:
     if update.message:
@@ -50,12 +31,8 @@ async def echo(update: Update, context: CallbackContext) -> None:
             await update.message.reply_text('Некорректное сообщение.')
             return
         
-        if not is_valid_imei(update.message.text):
-            await update.message.reply_text('Некорректный imei.')
-            return
-        
         response = await get_imei_data(update.message.text)
-        await update.message.reply_text(json.dumps(response, indent=4, ensure_ascii=True))
+        await update.message.reply_text(json.dumps(response, indent=4, ensure_ascii=False))
 
 async def get_imei_data(imei:str) -> dict|list:
     async with aiohttp.ClientSession() as session:
